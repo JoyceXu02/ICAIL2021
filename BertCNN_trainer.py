@@ -9,6 +9,9 @@ import pandas as pd
 from bert_dataset import *
 from loss_functions import *
 
+from roberta_pytorch import *
+from cnn_pytorch import *
+
 from sklearn.metrics import classification_report, f1_score
 
 def accuracy(preds, y):
@@ -196,7 +199,7 @@ if __name__ == "__main__":
 	# load model
 	print("loading model...")
 	bertmodel = Roberta(pretrained = args.pretrained)
-	bcnn = 
+	bcnn =  CNN()
 
 	# model, device, criterion, train_dataloader, valid_dataloader, epochs, batch_size, lr, loss
 	print("start training...")

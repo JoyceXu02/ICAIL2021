@@ -29,7 +29,7 @@ def accuracy(preds, y):
 def trainer(model, device, train_dataloader, val_dataloader, epochs, batch_size, lr, loss = 'crossentropy'):
 	if loss == 'crossentropy':
 		criterion = nn.CrossEntropyLoss()
-	elif loss == 'flocal':
+	elif loss == 'focal':
 		criterion = FocalLoss()
 	elif loss == 'f1':
 		criterion = F1Loss()
@@ -40,9 +40,10 @@ def trainer(model, device, train_dataloader, val_dataloader, epochs, batch_size,
 
 	min_val_loss = float('inf')
 
-	train_epoch_loss = 0
-	train_epoch_acc = 0
 	for epoch in range(epochs):
+		train_epoch_loss = 0
+		train_epoch_acc = 0
+
 		model.train()
 
 		for i, data in enumerate(train_dataloader):
@@ -88,13 +89,13 @@ def trainer(model, device, train_dataloader, val_dataloader, epochs, batch_size,
 				os.mkdir('saved_roberta_models')
 			torch.save(model, f'saved_roberta_models/tut-model.pt')
 		print(f'Epoch: {epoch}')
-		print(f'Training Loss: {avg_train_loss:.3f} | Training Accuracy: {avg_val_acc*100:.3f}%')
+		print(f'Training Loss: {avg_train_loss:.3f} | Training Accuracy: {avg_train_acc*100:.3f}%')
 		print(f'Validation Loss: {avg_val_loss:.3f} | Valication Accuracy: {avg_val_acc*100:.3f}%')
 
 def evaluate(model, device,  test_loader, loss = 'crossentropy'):
 	if loss == 'crossentropy':
 		criterion = nn.CrossEntropyLoss()
-	elif loss == 'flocal':
+	elif loss == 'focal':
 		criterion = FocalLoss()
 	elif loss == 'f1':
 		criterion = F1Loss()
@@ -109,25 +110,29 @@ def evaluate(model, device,  test_loader, loss = 'crossentropy'):
 
 	model.eval()
 	with torch.no_grad():
-		for batch in test_loader:
+		for i, data in enumerate(test_loader):
 			ids = data['ids'].to(device, dtype = torch.long)
 			mask = data['mask'].to(device, dtype = torch.long)
 			token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
 			targets = data['targets'].to(device, dtype = torch.long)
+			labels_list += targets.tolist()
 
 			outputs = model(ids, mask, token_type_ids)
 			loss = criterion(outputs, targets)			
 			max_idx, acc = accuracy(outputs, targets)
 			test_epoch_loss += loss.item()
 			test_epoch_acc += acc.item()
+			preds_list +=torch.flatten(max_idx).tolist()
+
 
 	avg_test_loss = test_epoch_loss/len(test_loader)
 	avg_test_acc = test_epoch_acc/len(test_loader)
-	print(f'Test Loss: {avg_test_loss:.3f} | Test Accuracy: {avg_test_acc*100:.3f}%')	
+	print(f'Test Loss: {avg_test_loss:.3f} | Test Accuracy: {avg_test_acc*100:.3f}%')
+
 	conf_matrix = classification_report(labels_list, preds_list)
 	print('Confusion matrix:')
 	print(conf_matrix)
-	return preds		
+	return preds_list		
 
 
 if __name__ == "__main__":
@@ -140,13 +145,13 @@ if __name__ == "__main__":
 	my_parser.add_argument("--max_len", type = int,
 							default = 256)
 	my_parser.add_argument("--epochs", type=int,
-							default = 1)
+							default = 3)
 	my_parser.add_argument("--batch_size", type=int,
 							default = 16)
 	my_parser.add_argument("--dropout_rate", type=float,
 							default = 0.5)
 	my_parser.add_argument("--lr", type=float,
-							default = 2e-3),
+							default = 2e-5),
 	my_parser.add_argument("--loss", type=str,
 							default = 'crossentropy')
 
@@ -197,12 +202,12 @@ if __name__ == "__main__":
 	model = Roberta(pretrained = args.pretrained)
 
 	# model, device, criterion, train_dataloader, valid_dataloader, epochs, batch_size, lr, loss
-	print("start training...")
-	trainer(model= model, device=device, 
-			train_dataloader= train_loader, val_dataloader=valid_loader,  
-			epochs = args.epochs, batch_size = args.batch_size, lr = args.lr, loss = args.loss)
+	# print("start training...")
+	# trainer(model= model, device=device, 
+	# 		train_dataloader= train_loader, val_dataloader=valid_loader,  
+	# 		epochs = args.epochs, batch_size = args.batch_size, lr = args.lr, loss = args.loss)
 
-	print('load the best model...')
+	# print('load the best model...')
 	best_model = torch.load('saved_roberta_models/tut-model.pt',map_location={'cuda:1':'cuda:0'})
 	preds = evaluate(best_model, device, test_loader, loss=args.loss)
 

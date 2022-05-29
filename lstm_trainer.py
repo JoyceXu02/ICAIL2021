@@ -65,7 +65,7 @@ def trainer(model,
 			):
 	if loss == 'crossentropy':
 		criterion = nn.CrossEntropyLoss()
-	elif loss == 'flocal':
+	elif loss == 'focal':
 		criterion = FocalLoss()
 	elif loss == 'f1':
 		criterion = F1Loss()
@@ -77,11 +77,10 @@ def trainer(model,
 	optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 	# start train
 	
-	train_epoch_loss = 0
-	train_epoch_acc = 0
-
-	
 	for epoch in range(epochs):
+
+		train_epoch_loss = 0
+		train_epoch_acc = 0
 		model.train()
 		for batch in train_dataloader:
 
@@ -131,13 +130,13 @@ def trainer(model,
 			torch.save(model, f'saved_lstm_models/tut-model.pt')
 
 		print(f'Epoch: {epoch}')
-		print(f'Training Loss: {avg_train_loss:.3f} | Training Accuracy: {avg_val_acc*100:.3f}%')
+		print(f'Training Loss: {avg_train_loss:.3f} | Training Accuracy: {avg_train_acc*100:.3f}%')
 		print(f'Validation Loss: {avg_val_loss:.3f} | Valication Accuracy: {avg_val_acc*100:.3f}%')
 
 def evaluate(model, device,  test_loader, loss = 'crossentropy'):
 	if loss == 'crossentropy':
 		criterion = nn.CrossEntropyLoss()
-	elif loss == 'flocal':
+	elif loss == 'focal':
 		criterion = FocalLoss()
 	elif loss == 'f1':
 		criterion = F1Loss()
@@ -162,6 +161,7 @@ def evaluate(model, device,  test_loader, loss = 'crossentropy'):
 			loss = criterion(predictions, label)
 			preds, acc = accuracy(predictions, label)
 			preds_list +=torch.flatten(preds).tolist()
+
 
 			test_epoch_loss += loss.item()
 			test_epoch_acc += acc.item()
