@@ -84,7 +84,8 @@ def trainer(model,
 	for epoch in range(epochs):
 		train_epoch_loss = 0
 		train_epoch_acc = 0
-
+		
+		print("start training...")
 		model.train()
 		for batch in train_dataloader:
 			text = batch['sentence'].to(device)

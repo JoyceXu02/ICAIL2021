@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-## heavily reference to https://github.com/bentrevett/pytorch-sentiment-analysis
+## reference: https://github.com/bentrevett/pytorch-sentiment-analysis
 class LSTM(nn.Module):
 	def __init__(self, vocab_size, embed_size, hidden_dim, 
 				output_dim, padding_idx,dropout=0.5, n_layers=1, bidirectional=True):

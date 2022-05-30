@@ -43,7 +43,7 @@ def trainer(model, device, train_dataloader, val_dataloader, epochs, batch_size,
 	for epoch in range(epochs):
 		train_epoch_loss = 0
 		train_epoch_acc = 0
-
+		print("start training...")
 		model.train()
 
 		for i, data in enumerate(train_dataloader):
@@ -202,12 +202,12 @@ if __name__ == "__main__":
 	model = Roberta(pretrained = args.pretrained)
 
 	# model, device, criterion, train_dataloader, valid_dataloader, epochs, batch_size, lr, loss
-	# print("start training...")
-	# trainer(model= model, device=device, 
-	# 		train_dataloader= train_loader, val_dataloader=valid_loader,  
-	# 		epochs = args.epochs, batch_size = args.batch_size, lr = args.lr, loss = args.loss)
+	print("start training...")
+	trainer(model= model, device=device, 
+			train_dataloader= train_loader, val_dataloader=valid_loader,  
+			epochs = args.epochs, batch_size = args.batch_size, lr = args.lr, loss = args.loss)
 
-	# print('load the best model...')
+	print('load the best model...')
 	best_model = torch.load('saved_roberta_models/tut-model.pt',map_location={'cuda:1':'cuda:0'})
 	preds = evaluate(best_model, device, test_loader, loss=args.loss)
 

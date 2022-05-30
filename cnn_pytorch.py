@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 # an implementation of Kim 2014 CNN model
-# heavily referce from https://github.com/bentrevett/pytorch-sentiment-analysis
+# reference: https://github.com/bentrevett/pytorch-sentiment-analysis
 class CNN(nn.Module):
 	def __init__(self, vocab_size, embed_size,
 				output_dim, padding_idx, n_filters = 100, filter_sizes=[3,4,5], dropout = 0.5):
